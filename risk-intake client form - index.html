@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client Profile &amp; Risk Questionnaire — Redmount Capital Partners</title>
+<style>
+  :root{
+    --navy:#002347; --navy-2:#01315f; --cobalt:#2f6fed; --cobalt-dim:#5b8bf0;
+    --paper:#f6f7fa; --card:#ffffff; --line:#e2e6ee; --ink:#0e1a2b; --ink-dim:#5b6b82;
+    --good:#177350; --bad:#9c2b2b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; background:var(--paper); color:var(--ink);
+    font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .wrap{width:100%; max-width:560px;}
+  .brand{text-align:center; margin-bottom:22px; color:var(--navy); font-weight:800; font-size:14px; letter-spacing:.04em;}
+  .brand small{display:block; font-weight:500; color:var(--ink-dim); font-size:11px; letter-spacing:.02em; margin-top:2px;}
+  .progress-track{height:6px; background:#e2e6ee; border-radius:99px; overflow:hidden; margin-bottom:28px;}
+  .progress-fill{height:100%; background:linear-gradient(90deg,var(--cobalt),var(--cobalt-dim)); border-radius:99px; transition:width .35s ease;}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:36px 32px; box-shadow:0 12px 32px -16px rgba(0,35,71,0.14);
+    min-height:340px; display:flex; flex-direction:column;
+  }
+  .step-label{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--cobalt); margin-bottom:10px;}
+  h1{font-size:23px; margin:0 0 10px; line-height:1.3; color:var(--navy);}
+  .sub{font-size:14px; color:var(--ink-dim); line-height:1.55; margin:0 0 24px;}
+  .sub.small{font-size:12px;}
+  .options{display:flex; flex-direction:column; gap:10px; margin-bottom:8px;}
+  .opt{
+    border:1.5px solid var(--line); border-radius:12px; padding:16px 18px; cursor:pointer;
+    font-size:14.5px; line-height:1.4; transition:border-color .15s, background .15s;
+    display:flex; align-items:center; gap:12px; background:#fff;
+    touch-action:manipulation; -webkit-tap-highlight-color:rgba(47,111,237,0.15); user-select:none;
+  }
+  .opt:hover{border-color:var(--cobalt-dim); background:#f8fafe;}
+  .opt.selected{border-color:var(--cobalt); background:#eef4ff; font-weight:600;}
+  .opt .dot{
+    width:20px; height:20px; border-radius:50%; border:2px solid var(--line); flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; transition:border-color .15s, background .15s;
+  }
+  .opt.selected .dot{border-color:var(--cobalt); background:var(--cobalt);}
+  .opt.selected .dot::after{content:''; width:8px; height:8px; border-radius:50%; background:#fff;}
+  .field-row{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:8px;}
+  .field{flex:1; min-width:160px; display:flex; flex-direction:column; gap:6px;}
+  .field label{font-size:12px; font-weight:600; color:var(--ink-dim);}
+  .field input{
+    border:1.5px solid var(--line); border-radius:10px; padding:12px 14px; font-size:15px;
+    font-family:inherit; color:var(--ink);
+  }
+  .field input:focus{outline:none; border-color:var(--cobalt);}
+  .slider-wrap{margin-bottom:8px;}
+  .slider-value{font-size:32px; font-weight:800; color:var(--navy); text-align:center; margin-bottom:6px;}
+  input[type=range]{width:100%; accent-color:var(--cobalt); height:6px;}
+  .slider-labels{display:flex; justify-content:space-between; font-size:11px; color:var(--ink-dim); margin-top:4px;}
+  .btn-row{display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:24px;}
+  .btn{
+    background:var(--cobalt); color:#fff; border:none; border-radius:10px;
+    padding:13px 26px; font-size:14.5px; font-weight:700; cursor:pointer; transition:background .15s;
+  }
+  .btn:hover{background:#2660d4;}
+  .btn:disabled{background:#c7d3e8; cursor:not-allowed;}
+  .btn.ghost{background:transparent; color:var(--ink-dim); padding:13px 10px; font-weight:600;}
+  .btn.ghost:hover{color:var(--navy); background:transparent;}
+  .btn.full{width:100%;}
+  .center-card{align-items:center; justify-content:center; text-align:center;}
+  .icon-circle{
+    width:64px; height:64px; border-radius:50%; background:#eef4ff; color:var(--cobalt);
+    display:flex; align-items:center; justify-content:center; font-size:30px; margin-bottom:18px;
+  }
+  .icon-circle.good{background:#e7f5ee; color:var(--good);}
+  .icon-circle.bad{background:#fbe9e9; color:var(--bad);}
+  .footnote{text-align:center; font-size:11px; color:#9aa8bd; margin-top:18px;}
+  .skip-link{text-align:center; font-size:12.5px; color:var(--ink-dim); margin-top:14px; cursor:pointer; text-decoration:underline;}
+  .hidden{display:none !important;}
+
+  .field select, .field textarea{
+    border:1.5px solid var(--line); border-radius:10px; padding:12px 14px; font-size:15px;
+    font-family:inherit; color:var(--ink); background:#fff;
+  }
+  .field select:focus, .field textarea:focus{outline:none; border-color:var(--cobalt);}
+  .field.full{flex-basis:100%;}
+  .field .req{color:var(--bad); margin-left:2px;}
+  .checks{display:flex; flex-wrap:wrap; gap:8px;}
+  .chk{border:1.5px solid var(--line); border-radius:99px; padding:9px 14px; font-size:13.5px; cursor:pointer; user-select:none; background:#fff;}
+  .chk.on{border-color:var(--cobalt); background:#eef4ff; font-weight:600;}
+  .optional-note{font-size:12px; color:var(--ink-dim); background:#f3f6fb; border-radius:8px; padding:9px 12px; margin-bottom:18px;}
+  .notice{font-size:13px; line-height:1.5; color:var(--navy); background:#eef4ff; border:1px solid #d6e3fb; border-radius:10px; padding:12px 14px; margin-bottom:6px;}
+  .benef{border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:12px;}
+  .benef-head{display:flex; justify-content:space-between; align-items:center; font-size:12px; font-weight:700; color:var(--ink-dim); margin-bottom:8px; text-transform:uppercase; letter-spacing:.05em;}
+  .link-btn{background:none; border:none; color:var(--cobalt); font-weight:600; font-size:13px; cursor:pointer; padding:4px 0;}
+  .err{color:var(--bad); font-size:12.5px; margin-top:4px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">REDMOUNT CAPITAL PARTNERS<small id="brandSub">Client Profile &amp; Risk Questionnaire</small></div>
+  <div class="progress-track hidden" id="progressTrack"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div id="cardHost"></div>
+  <div class="footnote">Your answers go directly and privately to your advisor. This link is unique to you and expires automatically.</div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://pdympbpyavilstjsmjtm.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_2CogNhXWXa7phJfFPpxVgg_JEevv89Y';
+
+function getToken(){
+  const params = new URLSearchParams(window.location.search);
+  return params.get('token') || '';
+}
+
+async function callRPC(fnName, body){
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fnName}`, {
+    method:'POST',
+    headers:{'apikey':SUPABASE_KEY, 'Content-Type':'application/json'},
+    body: JSON.stringify(body)
+  });
+  if(!res.ok) throw new Error('Request failed: '+res.status);
+  return res.json();
+}
+
+function attr(v){ return String(v==null?'':v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+const fmt = v => '$' + Math.round(v).toLocaleString();
+const cleanMoney = v => String(v||'').replace(/[^0-9.]/g,'');
+
+let clientName = '';
+// ?mode=risk → questionnaire-only version for existing clients whose profile
+// is already on file. Same token and same submission; it just skips the
+// profile steps.
+const RISK_ONLY = new URLSearchParams(window.location.search).get('mode') === 'risk';
+let currentStep = 0;
+
+// Profile fields, keyed by their path on the advisor's client record
+// (client1.first, financial.netWorth, ...). The advisor tool reads these
+// paths directly, so a new field only needs a matching label there.
+const prof = {};
+// Risk questionnaire + goal answers (flat keys, same as before).
+const answers = {
+  lossReaction:'', historicalBehavior:'', maxLossTolerance:'',
+  gainFlipChoice:'', lossFlipChoice:'',
+  incomeStability:'', experienceLevel:'',
+  goalDescription:'', goalTargetAmount:'', goalYears:''
+};
+let beneficiaries = [];
+
+function ageFromDob(dob){
+  if(!dob) return null;
+  const d = new Date(dob + 'T00:00:00');
+  if(isNaN(d)) return null;
+  const now = new Date();
+  let a = now.getFullYear() - d.getFullYear();
+  const m = now.getMonth() - d.getMonth();
+  if(m < 0 || (m === 0 && now.getDate() < d.getDate())) a--;
+  return a;
+}
+function dobValid(dob){ const a = ageFromDob(dob); return a !== null && a >= 0 && a < 120; }
+
+// ---- Generic form step ----
+// field: {path, label, type: text|email|tel|date|money|number|select|yesno|checks|textarea, opts, ph, full, req}
+function fieldHTML(f){
+  const v = prof[f.path];
+  const lab = `<label for="f_${f.path}">${f.label}${f.req?'<span class="req">*</span>':''}</label>`;
+  const cls = 'field' + (f.full ? ' full' : '');
+  if(f.type==='select' || f.type==='yesno'){
+    const opts = f.type==='yesno' ? [['yes','Yes'],['no','No']] : f.opts.map(o=>Array.isArray(o)?o:[o,o]);
+    return `<div class="${cls}">${lab}<select id="f_${f.path}" data-path="${f.path}">
+      <option value="">Select…</option>${opts.map(([val,l])=>`<option value="${attr(val)}" ${v===val?'selected':''}>${l}</option>`).join('')}
+    </select></div>`;
+  }
+  if(f.type==='checks'){
+    const arr = prof[f.path] || [];
+    return `<div class="${cls}">${lab}<div class="checks" data-checks="${f.path}">
+      ${f.opts.map(o=>`<div class="chk ${arr.includes(o)?'on':''}" data-val="${attr(o)}">${o}</div>`).join('')}
+    </div></div>`;
+  }
+  if(f.type==='textarea'){
+    return `<div class="${cls}">${lab}<textarea id="f_${f.path}" data-path="${f.path}" rows="3" placeholder="${attr(f.ph||'')}">${attr(v)}</textarea></div>`;
+  }
+  const type = f.type==='money' ? 'text' : f.type;
+  const extra = f.type==='money' ? 'inputmode="decimal"' : f.type==='number' ? 'inputmode="numeric" min="0"' : '';
+  const shown = f.type==='money' && v ? Number(v).toLocaleString() : (v||'');
+  return `<div class="${cls}">${lab}<input type="${type}" id="f_${f.path}" data-path="${f.path}" data-money="${f.type==='money'?1:''}" ${extra} value="${attr(shown)}" placeholder="${attr(f.ph||'')}"></div>`;
+}
+
+function bindFields(root){
+  root.querySelectorAll('[data-path]').forEach(el=>{
+    const handler = ()=>{
+      prof[el.dataset.path] = el.dataset.money ? cleanMoney(el.value) : el.value;
+      updateNextButton();
+    };
+    el.addEventListener('input', handler);
+    el.addEventListener('change', handler);
+  });
+  root.querySelectorAll('[data-checks]').forEach(wrap=>{
+    wrap.addEventListener('click', e=>{
+      const el = e.target.closest('.chk'); if(!el) return;
+      const path = wrap.dataset.checks, val = el.dataset.val;
+      const arr = prof[path] || [];
+      prof[path] = arr.includes(val) ? arr.filter(x=>x!==val) : arr.concat(val);
+      el.classList.toggle('on');
+    });
+  });
+}
+
+function formStep({label, title, sub, fields, canAdvance, extraHTML}){
+  return {
+    label: label || 'Optional', title, sub,
+    body: `${label==='Required' ? '' : '<div class="optional-note">Fill in what you can. Leave anything blank you\'d rather go over with your advisor.</div>'}
+      <div class="field-row">${fields.map(fieldHTML).join('')}</div>${extraHTML||''}`,
+    afterRender: () => bindFields(document.getElementById('cardHost')),
+    canAdvance: canAdvance || (() => true),
+  };
+}
+
+const EMPLOYMENT = ['Employed','Self-employed','Unemployed','Student','Retired'];
+function employmentFields(k){
+  return [
+    {path:k+'.status', label:'Employment status', type:'select', opts:EMPLOYMENT},
+    {path:k+'.employer', label:'Employer', type:'text'},
+    {path:k+'.occupation', label:'Occupation / title', type:'text'},
+    {path:k+'.startDate', label:'Started there', type:'date'},
+    {path:k+'.salary', label:'Annual salary ($)', type:'money', ph:'e.g. 150,000'},
+  ];
+}
+
+// ---- Steps ----
+function stepWelcome(){
+  return {
+    label: '', title: `Hi${clientName ? ' ' + clientName : ''}, welcome.`,
+    sub: `Your advisor at Redmount Capital Partners has asked you to fill in your profile and a short risk questionnaire. It takes about 10 minutes.`,
+    body: `<div class="notice"><strong>Please complete as much as you can.</strong> The more you fill in, the less we need to cover at our meeting. Only your <strong>name and date of birth</strong> are required. Everything else is optional, so skip anything you're unsure of or would rather discuss in person.</div>
+      <div class="sub small" style="margin-top:12px;">Please don't enter Social Security or account numbers here. Your advisor will collect those separately and securely.</div>`,
+    canAdvance: () => true,
+    hideBack: true,
+  };
+}
+
+function stepAboutYou(){
+  const nameOk = () => (prof['client1.first']||'').trim() && (prof['client1.last']||'').trim();
+  return formStep({
+    label:'Required', title:'About you',
+    sub:'Your name and date of birth are the only required answers.',
+    fields:[
+      {path:'client1.first', label:'First name', type:'text', req:true},
+      {path:'client1.mi', label:'Middle initial', type:'text'},
+      {path:'client1.last', label:'Last name', type:'text', req:true, full:true},
+      {path:'client1.dob', label:'Date of birth', type:'date', req:true, full:true},
+    ],
+    canAdvance: () => !!nameOk() && dobValid(prof['client1.dob']),
+  });
+}
+
+function stepContact(){
+  return formStep({ title:'How can we reach you?', sub:'',
+    fields:[
+      {path:'contact.email', label:'Email', type:'email', full:true},
+      {path:'contact.cell', label:'Cell phone', type:'tel'},
+      {path:'contact.phone', label:'Other phone', type:'tel'},
+      {path:'contact.address', label:'Home address', type:'text', full:true},
+      {path:'contact.cityStateZip', label:'City, state, ZIP', type:'text', full:true},
+    ]});
+}
+
+function stepEmployment(){
+  return formStep({ title:'Your work', sub:'', fields: employmentFields('client1') });
+}
+
+function stepSpouse(){
+  return formStep({ title:'Spouse or partner',
+    sub:'If someone else is part of your financial planning, add them here. Otherwise just continue.',
+    fields:[
+      {path:'client2.first', label:'First name', type:'text'},
+      {path:'client2.mi', label:'Middle initial', type:'text'},
+      {path:'client2.last', label:'Last name', type:'text'},
+      {path:'client2.dob', label:'Date of birth', type:'date'},
+      ...employmentFields('client2'),
+    ]});
+}
+
+function stepHousehold(){
+  return formStep({ title:'Your household', sub:'',
+    fields:[
+      {path:'household.size', label:'People in household', type:'number'},
+      {path:'household.dependentsUnder18', label:'Dependents under 18', type:'number'},
+      {path:'household.healthStatus', label:'Household health', type:'select', full:true,
+        opts:['Everyone in good health','Manageable ongoing condition','Dependent has significant healthcare needs']},
+      {path:'household.incomeSector', label:'Industry of your main household income', type:'select', full:true,
+        opts:['Technology','Financials / Financial Services','Healthcare / Food & Staples','Energy','Real Estate','Government / Public Sector','Retail / Consumer Services','Other']},
+      {path:'household.ownsPropertyInZip', label:'Do you own your home?', type:'yesno', full:true},
+    ]});
+}
+
+function stepFinancial(){
+  return formStep({ title:'Your financial picture', sub:'Rough estimates are fine.',
+    fields:[
+      {path:'financial.netWorth', label:'Estimated net worth ($)', type:'money', ph:'e.g. 2,000,000'},
+      {path:'financial.liquidNetWorth', label:'Liquid net worth ($)', type:'money', ph:'cash + investments'},
+      {path:'financial.annualIncome', label:'Annual household income ($)', type:'money'},
+      {path:'financial.annualExpense', label:'Annual household expenses ($)', type:'money'},
+      {path:'financial.investableAssets', label:'Total investable assets ($)', type:'money', ph:'e.g. 700,000'},
+      {path:'financial.plannedInvestment', label:'Amount you plan to invest with us ($)', type:'money'},
+      {path:'financial.taxBracket', label:'Federal tax bracket', type:'select', full:true, opts:['0-15%','16-28%','29-36%','36%+']},
+    ]});
+}
+
+function stepPreferences(){
+  return formStep({ title:'Investment preferences', sub:'',
+    fields:[
+      {path:'objective', label:'Main investment objective', type:'select', full:true, opts:['Safety of Principal','Tax Advantaged','Income','Growth','Speculation']},
+      {path:'horizon', label:'When will you need most of this money?', type:'select', full:true, opts:['Under 1 year','1-3 years','3-5 years','5-10 years','10-20 years','20+ years']},
+      {path:'riskTolerance', label:'How would you describe your risk tolerance?', type:'select', full:true, opts:['Conservative','Moderately Conservative','Moderate','Moderately Aggressive','Aggressive']},
+      {path:'liquidityImportance', label:'How important is quick access to cash?', type:'select', full:true, opts:['Very Important','Somewhat Important','Not Important']},
+      {path:'drawingFromHoldings', label:'Are you currently withdrawing from your investments to live on?', type:'yesno', full:true},
+    ]});
+}
+
+function stepIncomeTopics(){
+  return formStep({ title:'Other income and topics', sub:'',
+    fields:[
+      {path:'otherIncomeSources', label:'Other income sources (tap all that apply)', type:'checks', full:true, opts:['Social Security','Pensions','Rental Income','Part-Time Employment']},
+      {path:'otherIncomeOther', label:'Other income', type:'text', full:true},
+      {path:'issuesForDiscussion', label:'Anything you\'d like to discuss? (tap all that apply)', type:'checks', full:true, opts:['Financial Positions','Protection Analysis','Investment Analysis','Tax Analysis','Retirement Analysis','Estate Analysis']},
+      {path:'issuesOther', label:'Other topics', type:'textarea', full:true},
+    ]});
+}
+
+function stepBeneficiaries(){
+  return {
+    label:'Optional', title:'Beneficiaries',
+    sub:'Who should receive your accounts? Your advisor will confirm details with you. Please leave out Social Security numbers.',
+    body: `<div id="benefWrap">${beneficiaries.map((b,i)=>`
+      <div class="benef">
+        <div class="benef-head">Beneficiary ${i+1}<button class="link-btn" data-remove="${i}">Remove</button></div>
+        <div class="field-row">
+          <div class="field full"><label>Full name</label><input type="text" data-b="${i}" data-k="name" value="${attr(b.name)}"></div>
+          <div class="field"><label>Date of birth</label><input type="date" data-b="${i}" data-k="dob" value="${attr(b.dob)}"></div>
+          <div class="field"><label>Share (%)</label><input type="number" inputmode="numeric" min="0" max="100" data-b="${i}" data-k="pct" value="${attr(b.pct)}"></div>
+          <div class="field full"><label>Address</label><input type="text" data-b="${i}" data-k="address" value="${attr(b.address)}"></div>
+        </div>
+      </div>`).join('')}</div>
+      ${beneficiaries.length < 6 ? `<button class="link-btn" id="addBenef">+ Add a beneficiary</button>` : ''}`,
+    afterRender: () => {
+      document.querySelectorAll('[data-b]').forEach(el=> el.addEventListener('input', ()=>{ beneficiaries[+el.dataset.b][el.dataset.k] = el.value; }));
+      document.querySelectorAll('[data-remove]').forEach(el=> el.addEventListener('click', ()=>{ beneficiaries.splice(+el.dataset.remove,1); renderStep(); }));
+      const add = document.getElementById('addBenef');
+      if(add) add.addEventListener('click', ()=>{ beneficiaries.push({name:'',dob:'',pct:'',address:''}); renderStep(); });
+    },
+    canAdvance: () => true,
+  };
+}
+
+function stepProfessionals(){
+  return formStep({ title:'Your other advisors', sub:'Name and firm are plenty.',
+    fields:[
+      {path:'professionals.cpa', label:'CPA / accountant', type:'text', full:true},
+      {path:'professionals.attorney', label:'Estate planning attorney', type:'text', full:true},
+      {path:'professionals.other', label:'Other (insurance agent, etc.)', type:'text', full:true},
+    ]});
+}
+
+function stepWelcomeRisk(){
+  return {
+    label: '', title: `Hi${clientName ? ' ' + clientName : ''}, welcome.`,
+    sub: `Your advisor at Redmount Capital Partners has asked you to answer a short risk questionnaire. Your profile is already on file, so this is just six questions plus an optional goal. It takes about 3 minutes, and there are no wrong answers.`,
+    body: `<div class="sub small">You can skip any question, but the more you answer, the more useful this is.</div>`,
+    canAdvance: () => true,
+    hideBack: true,
+  };
+}
+
+function stepAssetsRisk(){
+  return formStep({ title:'One quick number', sub:'Two of the questions ahead use real dollar figures based on this. Leave it blank if you prefer and they will use percentages instead.',
+    fields:[ {path:'financial.investableAssets', label:'Roughly how much do you have invested? ($)', type:'money', ph:'e.g. 700,000', full:true} ]});
+}
+
+function stepRiskIntro(){
+  return {
+    label:'Risk questionnaire', title:'Now, a few questions about risk',
+    sub:'Six short questions about how you think about market ups and downs. There are no wrong answers. Each one is optional, but these are the most useful answers for your advisor.',
+    body:'', canAdvance: () => true,
+  };
+}
+
+function optionStep({label, title, sub, field, options}){
+  return {
+    label, title, sub,
+    body: `<div class="options" id="optWrap">${options.map(o=>`
+      <div class="opt ${answers[field]===o.val?'selected':''}" data-val="${o.val}"><span class="dot"></span><span>${o.label}</span></div>
+    `).join('')}</div>`,
+    afterRender: () => {
+      const wrap = document.getElementById('optWrap');
+      wrap.addEventListener('click', (e)=>{
+        const el = e.target.closest('.opt');
+        if(!el || !wrap.contains(el)) return;
+        answers[field] = el.getAttribute('data-val');
+        wrap.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+        el.classList.add('selected');
+        updateNextButton();
+      });
+    },
+    canAdvance: () => true,
+  };
+}
+
+function stepLossReaction(){
+  return optionStep({
+    label: 'Question 1 of 6', title: 'A market drop',
+    sub: `If you logged into your account and saw your portfolio was down 20% from where it started the year, what would you most likely do?`,
+    field: 'lossReaction',
+    options: [
+      {val:'sell_all', label:'Sell everything and move to cash to stop further losses'},
+      {val:'sell_some', label:'Sell some of my riskier investments to reduce exposure'},
+      {val:'hold', label:'Do nothing and wait it out'},
+      {val:'buy_little', label:'Buy a little more while prices are down'},
+      {val:'buy_lot', label:'Buy significantly more — this looks like an opportunity'},
+    ]
+  });
+}
+
+function stepHistoricalBehavior(){
+  return optionStep({
+    label: 'Question 2 of 6', title: 'Your track record',
+    sub: `Thinking back on real market downturns you've lived through, what did you actually do?`,
+    field: 'historicalBehavior',
+    options: [
+      {val:'sold_often', label:"I've sold out of fear more than once"},
+      {val:'sold_once', label:'I sold at least once and regretted it later'},
+      {val:'held', label:"I held steady and didn't change anything"},
+      {val:'bought_more', label:'I bought more while prices were down'},
+    ]
+  });
+}
+
+function stepMaxLoss(){
+  return optionStep({
+    label: 'Question 3 of 6', title: 'How much could you stomach?',
+    sub: `What's the largest one-year drop in your portfolio's value you could experience before you'd feel you needed to sell — regardless of what your advisor recommends? As a rough guide: a portfolio fully invested in stocks has historically dropped 30–50% in its worst years.`,
+    field: 'maxLossTolerance',
+    options: [
+      {val:'10', label:'Up to 10%'}, {val:'20', label:'10% – 20%'}, {val:'30', label:'20% – 30%'},
+      {val:'40', label:'30% – 40%'}, {val:'50', label:'40% – 50%'}, {val:'60', label:'50% or more'}
+    ]
+  });
+}
+
+function flipFigures(){
+  const assets = parseFloat(prof['financial.investableAssets']) || null;
+  return {
+    flipHigh: assets ? fmt(assets*0.30) : '30% of your investable assets',
+    certain: assets ? fmt(assets*0.15) : '15% of your investable assets',
+  };
+}
+
+function stepGainFlip(){
+  const {flipHigh, certain} = flipFigures();
+  return optionStep({
+    label: 'Question 4 of 6', title: 'A choice about gains',
+    sub: `Imagine you could choose between two options for your investable assets: (A) flip a coin — heads you gain ${flipHigh}, tails you gain nothing, or (B) a sure gain of ${certain}. Which would you pick?`,
+    field: 'gainFlipChoice',
+    options: [
+      {val:'certain', label:`(B) The sure gain of ${certain}`},
+      {val:'flip', label:`(A) Flip the coin`},
+    ]
+  });
+}
+
+function stepLossFlip(){
+  const {flipHigh, certain} = flipFigures();
+  return optionStep({
+    label: 'Question 5 of 6', title: 'A choice about losses',
+    sub: `Now the same idea, but facing a possible loss instead: (A) flip a coin — heads you lose ${flipHigh}, tails you lose nothing, or (B) a sure loss of ${certain}. Which would you pick?`,
+    field: 'lossFlipChoice',
+    options: [
+      {val:'flip', label:`(A) Flip the coin`},
+      {val:'certain', label:`(B) The sure loss of ${certain}`},
+    ]
+  });
+}
+
+function stepIncomeExperience(){
+  const group = (id, field, opts) => `<div class="options" id="${id}">
+    ${opts.map(([v,l])=>`<div class="opt ${answers[field]===v?'selected':''}" data-val="${v}"><span class="dot"></span><span>${l}</span></div>`).join('')}
+  </div>`;
+  return {
+    label: 'Question 6 of 6', title: 'A bit more about you',
+    sub: '',
+    body: `
+      <div style="margin-bottom:22px;">
+        <div style="font-weight:700; font-size:14px; margin-bottom:10px;">Over the next few years, do you expect your household income to:</div>
+        ${group('optIncome','incomeStability',[['decline','Likely decline'],['stable','Stay about the same'],['grow','Likely grow']])}
+      </div>
+      <div>
+        <div style="font-weight:700; font-size:14px; margin-bottom:10px;">How would you describe your investing experience?</div>
+        ${group('optExperience','experienceLevel',[['novice','New to investing — haven\'t been through a real downturn'],['some','Some experience — lived through at least one downturn'],['experienced','Extensive experience across multiple market cycles']])}
+      </div>
+    `,
+    afterRender: () => {
+      [['optIncome','incomeStability'],['optExperience','experienceLevel']].forEach(([id, field])=>{
+        const wrap = document.getElementById(id);
+        wrap.addEventListener('click', (e)=>{
+          const el = e.target.closest('.opt');
+          if(!el || !wrap.contains(el)) return;
+          answers[field] = el.getAttribute('data-val');
+          wrap.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+          el.classList.add('selected');
+        });
+      });
+    },
+    canAdvance: () => true,
+  };
+}
+
+function stepGoal(){
+  return {
+    label: 'Optional', title: 'Do you have a specific goal in mind?',
+    sub: `Something like retirement, a home purchase, or funding education. Skip this if you're not sure yet.`,
+    body: `
+      <div class="field-row">
+        <div class="field full"><label>Goal</label><input type="text" id="in_goalDesc" value="${attr(answers.goalDescription)}" placeholder="e.g. Retirement at 65"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Target amount ($)</label><input type="text" inputmode="decimal" id="in_goalAmt" value="${attr(answers.goalTargetAmount)}" placeholder="e.g. 2,000,000"></div>
+        <div class="field"><label>Years to reach it</label><input type="number" min="0" id="in_goalYears" value="${attr(answers.goalYears)}" placeholder="e.g. 20"></div>
+      </div>
+    `,
+    afterRender: () => {
+      document.getElementById('in_goalDesc').addEventListener('input', e=> answers.goalDescription = e.target.value);
+      document.getElementById('in_goalAmt').addEventListener('input', e=> answers.goalTargetAmount = cleanMoney(e.target.value));
+      document.getElementById('in_goalYears').addEventListener('input', e=> answers.goalYears = e.target.value);
+    },
+    canAdvance: () => true,
+  };
+}
+
+function answeredCount(){
+  let n = Object.values(prof).filter(v => Array.isArray(v) ? v.length : String(v||'').trim()).length;
+  n += Object.values(answers).filter(v => String(v||'').trim()).length;
+  n += beneficiaries.filter(b=>b.name).length;
+  return n;
+}
+
+function stepReview(){
+  const name = [prof['client1.first'], prof['client1.last']].filter(Boolean).join(' ');
+  return {
+    label: 'Last step', title: "You're all set",
+    sub: `Submitting${name ? ` for <strong>${attr(name)}</strong>` : ''} with ${answeredCount()} answers filled in. Use Back to fill in anything you skipped, or submit now. Your advisor will follow up after reviewing.`,
+    body: `<div class="sub small">Nothing changes on any account from this form. It just gives your advisor a clearer picture before your next conversation.</div>`,
+    canAdvance: () => true,
+    submitStep: true,
+  };
+}
+
+const steps = RISK_ONLY ? [stepWelcomeRisk, stepAssetsRisk, stepLossReaction, stepHistoricalBehavior, stepMaxLoss, stepGainFlip, stepLossFlip, stepIncomeExperience, stepGoal, stepReview] : [stepWelcome, stepAboutYou, stepContact, stepEmployment, stepSpouse, stepHousehold, stepFinancial,
+  stepPreferences, stepIncomeTopics, stepBeneficiaries, stepProfessionals,
+  stepRiskIntro, stepLossReaction, stepHistoricalBehavior, stepMaxLoss, stepGainFlip, stepLossFlip, stepIncomeExperience,
+  stepGoal, stepReview];
+
+let activeStep = null;
+
+function updateNextButton(){
+  const btn = document.getElementById('nextBtn');
+  if(btn && activeStep) btn.disabled = !activeStep.canAdvance();
+}
+
+function renderStep(){
+  const host = document.getElementById('cardHost');
+  const step = steps[currentStep]();
+  activeStep = step;
+  const isFirst = currentStep === 0;
+
+  document.getElementById('progressTrack').classList.toggle('hidden', isFirst);
+  document.getElementById('progressFill').style.width = `${(currentStep/(steps.length-1))*100}%`;
+
+  host.innerHTML = `
+    <div class="card">
+      ${step.label ? `<div class="step-label">${step.label}</div>` : ''}
+      <h1>${step.title}</h1>
+      ${step.sub ? `<div class="sub">${step.sub}</div>` : ''}
+      ${step.body || ''}
+      <div id="stepErr"></div>
+      <div class="btn-row">
+        ${!isFirst && !step.hideBack ? `<button class="btn ghost" id="backBtn">← Back</button>` : `<span></span>`}
+        <button class="btn" id="nextBtn">${step.submitStep ? 'Submit' : (isFirst ? "Let's begin" : 'Continue')}</button>
+      </div>
+    </div>
+  `;
+
+  if(step.afterRender) step.afterRender();
+
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.disabled = !step.canAdvance();
+  // On the required step, explain why Continue is disabled once a DOB is typed.
+  if(steps[currentStep] === stepAboutYou){
+    const dobEl = document.getElementById('f_client1.dob');
+    if(dobEl) dobEl.addEventListener('blur', ()=>{
+      document.getElementById('stepErr').innerHTML = (prof['client1.dob'] && !dobValid(prof['client1.dob'])) ? '<div class="err">Please check your date of birth.</div>' : '';
+    });
+  }
+  nextBtn.addEventListener('click', ()=>{
+    if(step.submitStep){ handleSubmit(); return; }
+    if(!step.canAdvance()) return;
+    currentStep++;
+    renderStep();
+    window.scrollTo(0,0);
+  });
+
+  const backBtn = document.getElementById('backBtn');
+  if(backBtn) backBtn.addEventListener('click', ()=>{ currentStep--; renderStep(); window.scrollTo(0,0); });
+}
+
+function investableBand(v){
+  const n = parseFloat(v); if(!n && n!==0) return '';
+  if(n < 200000) return 'Under $200K';
+  if(n < 500000) return '$200-500K';
+  if(n < 1000000) return '$500K-1 Million';
+  if(n <= 2000000) return '$1-2 Million';
+  return 'Over $2 Million';
+}
+
+function buildPayload(){
+  const profile = {};
+  Object.entries(prof).forEach(([k,v])=>{
+    if(Array.isArray(v)){ if(v.length) profile[k] = v; }
+    else if(String(v||'').trim() !== '') profile[k] = String(v).trim();
+  });
+  const age = ageFromDob(profile['client1.dob']);
+  if(age !== null) profile.age = String(age);
+  if(profile['financial.investableAssets']) profile['financial.totalAssets'] = investableBand(profile['financial.investableAssets']);
+  const benef = beneficiaries.filter(b=>(b.name||'').trim()).map(b=>({name:b.name.trim(), dob:b.dob||'', pct:b.pct||'', address:(b.address||'').trim()}));
+  if(benef.length) profile.beneficiaries = benef;
+  if(answers.goalDescription) profile['goal.description'] = answers.goalDescription;
+  if(answers.goalTargetAmount) profile['goal.targetAmount'] = answers.goalTargetAmount;
+  if(answers.goalYears) profile['goal.years'] = answers.goalYears;
+
+  // Flat keys kept alongside `profile` so older versions of the advisor
+  // tool still read name, age, assets, questionnaire and goal correctly.
+  return Object.assign({}, answers, {
+    firstName: profile['client1.first'] || '',
+    lastName: profile['client1.last'] || '',
+    age: profile.age || '',
+    investableAssets: profile['financial.investableAssets'] || '',
+    profile,
+  });
+}
+
+async function handleSubmit(){
+  const host = document.getElementById('cardHost');
+  host.innerHTML = `<div class="card center-card"><div class="icon-circle">…</div><h1>Submitting…</h1></div>`;
+  try{
+    const result = await callRPC('submit_intake', {p_token: getToken(), p_answers: buildPayload()});
+    if(result.success){
+      document.getElementById('progressTrack').classList.add('hidden');
+      host.innerHTML = `
+        <div class="card center-card">
+          <div class="icon-circle good">✓</div>
+          <h1>Thank you — all done.</h1>
+          <div class="sub">Your answers have been sent to your advisor at Redmount Capital Partners. They'll review them and follow up with you directly. You can close this page now.</div>
+        </div>`;
+    } else {
+      const msg = result.reason === 'already_used'
+        ? "Looks like this was already submitted — possibly from another tab or a second visit to this link. If that doesn't sound right, please reach out to your advisor."
+        : result.reason === 'expired'
+        ? "This link has expired. Please ask your advisor to send a new one."
+        : 'There was a problem submitting your answers. Please try again, or ask your advisor for a fresh link.';
+      showError(msg);
+    }
+  }catch(e){
+    showError('There was a problem submitting your answers. Please try again, or ask your advisor for a fresh link.');
+  }
+}
+
+function showError(msg){
+  document.getElementById('progressTrack').classList.add('hidden');
+  document.getElementById('cardHost').innerHTML = `
+    <div class="card center-card">
+      <div class="icon-circle bad">!</div>
+      <h1>Something's not right</h1>
+      <div class="sub">${msg}</div>
+    </div>`;
+}
+
+async function init(){
+  const token = getToken();
+  if(!token){
+    showError("This link is missing some information. Please ask your advisor for the correct link.");
+    return;
+  }
+  document.getElementById('cardHost').innerHTML = `<div class="card center-card"><div class="icon-circle">…</div><h1>Loading…</h1></div>`;
+  try{
+    const result = await callRPC('validate_intake_token', {p_token: token});
+    if(!result.valid){
+      const msg = result.reason === 'expired'
+        ? "This link has expired. Please ask your advisor to send a new one."
+        : result.reason === 'already_used'
+        ? "Looks like you've already completed this questionnaire. If you need to make changes, please reach out to your advisor."
+        : "This link isn't valid. Please check it was copied correctly, or ask your advisor for a new one.";
+      showError(msg);
+      return;
+    }
+    clientName = result.clientFirstName || '';
+    // Pre-fill the name the advisor entered when creating the link.
+    if(result.clientFirstName) prof['client1.first'] = result.clientFirstName;
+    if(result.clientLastName) prof['client1.last'] = result.clientLastName;
+    renderStep();
+  }catch(e){
+    showError("We couldn't load this questionnaire right now. Please try again in a moment.");
+  }
+}
+
+// ?preview opens the form without a token (nothing can be submitted) so you
+// can click through it yourself.
+if(RISK_ONLY){ document.getElementById('brandSub').textContent = 'Risk Questionnaire'; document.title = 'Risk Questionnaire — Redmount Capital Partners'; }
+if(new URLSearchParams(location.search).has('preview')){ clientName = 'there'; renderStep(); }
+else init();
+</script>
+</body>
+</html>
